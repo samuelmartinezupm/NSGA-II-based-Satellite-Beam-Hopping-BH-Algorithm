@@ -54,11 +54,9 @@ also stored as a dynamic attribute.
  
   +2) PopulationInitialization.m: Random population initialization. The entire population is randomly generated, by fixing first the cells that are chosen for illumination and then adjusting bandwidth and power matrices randomly, but in a controlled manner, complying with the defined constraints.
  
-  +3) Platemo.m: Execution of NSGA-II (NSGAII.m) algorithm.
+  +3) OperatorGA.m: It creates a new solution representation for the BH problem (type 6). The LEO function directly calls the crossover operator, as described in the paper, and then executes the mutation and local search (dB) operators with a given rate. if dbRate = 0, then a non-hybrid, canonical version of NSGA-II is considered.
 
-    + CrossOver
-    + Mutation
-    + LocalSearch
+  The mutation operator is implemented in MutationLEO.m, which receives a tentative solutions and perform the modifications in the B, P and Ill matrices. Analogously, DB_Local.m implements the db operator described in the paper.
 
     + MultiObjectiveFunction.m: Evaluation of a given illumination [Ill] and resource allocation ([B] and [P]) solution. 
  
