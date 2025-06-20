@@ -16,7 +16,7 @@ function [c, eq] = Constraints(x,B_T,b_slots, P_T, UpC, c_scenario, n_users, num
     
     for t=1:size(P,2)
         c(1) = c(1) + max(0,(round(sum(P(:,t))*100)/100 - P_T));
-        c(2) = c(2) + max(0, (sum(((B(:,:,t)'*Adj_u)*B(:,:,t)>size(B,2)),"all")));
+        c(2) = c(2) + max(0, (sum(((B(:,:,t)'*Adj_u)*B(:,:,t)>beams),"all")));
         c(3) = c(3) + max(0, (ones(size(Ill,1),1)-Ill(:,t))'*(UpC*P(:,t)));
         c(4) = c(4) + max(0, ((ones(size(Ill,1),1)-Ill(:,t))'*(UpC*sum(B(:,:,t),2))));
         c(5) = c(5) + max(0, (sum(Ill(:,t)) - beams));
