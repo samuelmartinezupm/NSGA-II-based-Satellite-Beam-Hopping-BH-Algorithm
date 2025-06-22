@@ -67,7 +67,14 @@ also stored as a dynamic attribute.
   +4) FOM_calculation_demand_based_band_slots.m: Execution of the Demand-based (DB) BH algorithm, for comparative purposes. For each time slot, cell illumination [Ill], resource allocation ([B] and [P]) and link budget calculations are performed, determining the FoM: EC, UC, TTS. 
 
   +5)  'NSGA_II_[', instance,'_', num2str(scenario), ']_result_','MAXFEs', num2str(maxFEs), '.P',num2str(popSize),'.i',init,'.cR', num2str(c_rate_LEO),'.mType', m_type_LEO,'.mRate', num2str(m_rate_LEO),'.lsType', ls_type, '.lsRate',num2str(ls_rate),'.users', num2str(n_users),'.r',num2str(run),'.mat': Instance result saving (NSGA-II + DB).
-  
+
++ Statistical Confidence Analysis (Statistical_Confidence): it contains the funtions to compute the statistical confidence tables presented in Appendix A.2, to ensure the reliability of the observed differences across the tested configurations.
+
+  +1) HV_files_generation.m: for each scenario and operator configuration under study, generate a file with the 30 HV of each of the runs, comparing the pareto front with respect to the generated RPF (acumulado_SCENARIO.txt.pf) by making use of Aux_functions/hv.jar. 
+
+  +2) HV_statistic_confidence.m: once HV are computed and normalized with respect to RPF, for each scenario matlab/statistics.m and matlab/chessmat.m functions are executed, for statistical checkout between operator condiguration. We first check for the normality and homocedasticity of the samples. Depending on the output of these tests, an ANOVA I, Welch or Kruskal-Wallis is used to check the difference of the samples. A post-hoc test that corrects statistically accumulated errors is undertaken. We have used a 95\% confidence level for all these test, and summarized this information in a graphical (the tables from Appendix A.2 that are generated) form rather than including the raw p-values. Indeed, both triangles in the figures indicate that the statistical procedure has resulted in a p-value below 0.05. It is either upward o downward if the central value of the sample is higher or lower, respectively. The spot is left empty if the p-value is greater than or equal 0.05. 
+
+
 NOTE: Demand-based (DB) BH algorithm is available at: https://github.com/samuelmartinezupm/Demand-based-Satellite-Beam-Hopping-BH-Algorithm 
 
 ## Contact
