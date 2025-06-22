@@ -29,7 +29,7 @@ function Offspring = OperatorGAhalf(Problem,Parent,Parameter)
     Parent1   = Parent(1:floor(end/2),:);
     Parent2   = Parent(floor(end/2)+1:floor(end/2)*2,:);
     Offspring = zeros(size(Parent1,1),size(Parent1,2));
-    Type      = arrayfun(@(i)find(Problem.encoding==i),1:5,'UniformOutput',false);
+    Type      = arrayfun(@(i)find(Problem.encoding==i),1:6,'UniformOutput',false);
     if ~isempty([Type{1:2}])    % Real and integer variables
         Offspring(:,[Type{1:2}]) = GAreal(Parent1(:,[Type{1:2}]),Parent2(:,[Type{1:2}]),Problem.lower([Type{1:2}]),Problem.upper([Type{1:2}]),proC,disC,proM,disM);
     end
@@ -41,6 +41,9 @@ function Offspring = OperatorGAhalf(Problem,Parent,Parameter)
     end
     if ~isempty(Type{5})        % Permutation variables
         Offspring(:,Type{5}) = GApermutation(Parent1(:,Type{5}),Parent2(:,Type{5}),proC);
+    end
+    if ~isempty(Type{6})        % LEO variables
+        Offspring(:,Type{6}) = LEO(Parent1(:,[Type{6}]),Parent2(:,[Type{6}]),proC,disC,proM,disM);
     end
     if evaluated
         Offspring = Problem.Evaluation(Offspring);
@@ -139,4 +142,133 @@ function Offspring = GApermutation(Parent1,Parent2,proC)
             Offspring(i,:) = Offspring(i,[1:k(i)-1,k(i)+1:s(i)-1,k(i),s(i):end]);
         end
     end
+end
+
+function Offspring = LEO(Parent1,Parent2,cType, cRate, mType, mRate)
+    % Genetic operators for LEO problem
+    global b_slots;
+    global n_users;
+    global number_cells;
+    global frame;
+    global c_rate_LEO;
+    global m_type_LEO;
+    global m_rate_LEO;
+    global ls_type_LEO;
+    global ls_rate_LEO;
+
+
+    %% LEO customized crossover
+    [N,D] = size(Parent1);
+
+    Offspring = [];
+
+    for i = 1:N
+        p1 = Parent1(i,:);
+        p2 = Parent2(i,:);
+        if rand < c_rate_LEO
+
+            % Exchange up to 10% frames randomly
+            numberExchangedFrames = randi([1 frame]);
+            %numberExchangedFrames = 1;
+            exchangedFrames = randperm(frame);
+    
+            %% Ilumination
+            limit1 = 1;
+            limit2 = number_cells*frame;
+            Ill_p1 = reshape(p1(limit1:limit2),number_cells,frame);
+            Ill_p2 = reshape(p2(limit1:limit2),number_cells,frame);
+    
+            % Copy Ills 
+            Ill_c1 = Ill_p1;
+            Ill_c2 = Ill_p2;
+    
+            % Exchange the random frames
+            for f = 1:numberExchangedFrames
+                chosenFrame = exchangedFrames(f);
+                aux = Ill_c1(:,chosenFrame);
+                Ill_c1(:,chosenFrame) = Ill_c2(:,chosenFrame);
+                Ill_c2(:,chosenFrame) = aux;
+            end
+            
+            %% Bandwidth
+    
+            limit1 = limit2+1;
+            limit2 = number_cells*frame + n_users*b_slots*frame;
+            B_p1 = reshape(p1(limit1:limit2),n_users,b_slots,frame);
+            B_p2 = reshape(p2(limit1:limit2),n_users,b_slots,frame);
+    
+            B_c1 = B_p1;
+            B_c2 = B_p2;
+    
+            for f = 1:numberExchangedFrames
+                chosenFrame = exchangedFrames(f);
+                aux = B_c1(:,:,chosenFrame);
+                B_c1(:,:,chosenFrame) = B_c2(:,:,chosenFrame);
+                B_c2(:,:,chosenFrame) = aux;
+    
+            end
+    
+        
+            %% Power
+            limit1 = limit2+1;
+            limit2 = number_cells*frame + n_users*b_slots*frame+n_users*frame;
+            P_p1 = reshape(p1(limit1:limit2),n_users,frame);
+            P_p2 = reshape(p2(limit1:limit2),n_users,frame);
+    
+            % Copy Ills 
+            P_c1 = P_p1;
+            P_c2 = P_p2;
+    
+            % Exchange the random frames
+            for f = 1:numberExchangedFrames
+                chosenFrame = exchangedFrames(f);
+                aux = P_c1(:,chosenFrame);
+                P_c1(:,chosenFrame) = P_c2(:,chosenFrame);
+                P_c2(:,chosenFrame) = aux;
+            end
+            
+            % Append children to the optput value after mutation
+            child1 = [Ill_c1(:)', B_c1(:)',P_c1(:)'];
+            child2 = [Ill_c2(:)', B_c2(:)',P_c2(:)'];
+    
+            if rand < 0.5
+                Offspring = [Offspring; child1];
+            else
+                Offspring = [Offspring; child2];
+            end
+
+            % [x_1_p,f_1_p,g_1_p] = SingleObjectiveFunction(p1);
+            % [x_1_c,f_1_c,g_1_c] = SingleObjectiveFunction(child1);
+            % 
+            % [x_2_p,f_2_p,g_2_p] = SingleObjectiveFunction(p2);
+            % [x_2_c,f_2_c,g_2_c] = SingleObjectiveFunction(child2);
+            % 
+            % fprintf('parent1: %.4f; child1: %.4f \n',f_1_p,f_1_c);
+            % fprintf('parent2: %.4f; child2: %.4f \n',f_2_p,f_2_c);
+        else
+            %Offspring = [Offspring; p1; p2];
+            
+            if rand < 0.5
+                Offspring = [Offspring; p1];
+            else
+                Offspring = [Offspring; p2];
+            end
+        end
+        
+    end
+
+    for i = 1:size(Offspring,1)
+        %[x_1,f_1,g_1] = SingleObjectiveFunction(Offspring(i,:));
+        Offspring(i,:) = MutationLEO(Offspring(i,:),m_type_LEO, m_rate_LEO);
+        %[x_2,f_2,g_2] = SingleObjectiveFunction(Offspring(i,:));
+        %fprintf('Before mutation: %.4f; After mutation: %.4f \n',f_1,f_2);
+    end
+
+    for i = 1:size(Offspring,1)
+        %[x_1,f_1,g_1] = SingleObjectiveFunction(Offspring(i,:));
+        Offspring(i,:) = DB_LocalSearch(Offspring(i,:),ls_type_LEO, ls_rate_LEO);
+        %[x_2,f_2,g_2] = SingleObjectiveFunction(Offspring(i,:));
+        %fprintf('Before mutation: %.4f; After mutation: %.4f \n',f_1,f_2);
+    end
+    
 end
