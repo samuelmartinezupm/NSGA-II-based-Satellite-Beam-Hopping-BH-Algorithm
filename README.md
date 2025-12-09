@@ -3,8 +3,8 @@
 This code is © Samuel M. Zamacola and Francisco Luna Valero, 2025, and it is made available under the GPL license enclosed with the software.
 
 Over and above the legal restrictions imposed by this license, if you use this software for an academic publication then you are obliged to provide proper attribution to the paper that describes it:
-+ S. M. Zamacola, F. L. Valero and R. M. Rodríguez-Osorio, ‘Hybrid MOEA with problem-specific operators for beam-hopping based resource allocation in multi-beam LEO Satellites’, .....
-
++ S. M. Zamacola, F. L. Valero and R. M. Rodríguez-Osorio, ‘Hybrid MOEA with problem-specific operators for beam-hopping based resource allocation in multi-beam LEO Satellites’, Swarm and Evolutionary Computation, Volume 99, 2025.
+  
 Additionally as the software is based in PlaEMO, for research and educational purposes, the following reference must be acknowledged:
 + Ye Tian, Ran Cheng, Xingyi Zhang, and Yaochu Jin, PlatEMO: A MATLAB Platform for Evolutionary Multi-Objective Optimization [Educational Forum], IEEE Computational Intelligence Magazine, 2017, 12(4): 73-87
 
